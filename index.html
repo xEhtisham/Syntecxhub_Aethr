@@ -4,10 +4,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
+    <title>AETHR — Weather in Motion</title>
+    <meta name="description" content="AETHR — a premium atmospheric weather experience.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+    <!-- Atmospheric Background -->
+    <div class="atmosphere" aria-hidden="true">
+        <div class="atmosphere__glow atmosphere__glow--one"></div>
+        <div class="atmosphere__glow atmosphere__glow--two"></div>
+        <div class="atmosphere__grain"></div>
+    </div>
+
+
+    <!-- Main Application -->
+    <main class="app">
+
+        <!-- Header -->
+        <header class="header">
+
+            <a href="/" class="logo" aria-label="AETHR home">
+                AETHR
+            </a>
+
+            <div class="header__right">
+
+                <button class="unit-toggle" type="button" aria-label="Toggle temperature unit">
+                    <span class="unit-toggle__active">°C</span>
+                    <span>°F</span>
+                </button>
+
+                <button class="location-button" type="button" aria-label="Use current location">
+                    <span class="location-button__icon">⌖</span>
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- Search -->
+        <section class="search" aria-label="Search weather">
+
+            <form class="search__form" id="searchForm">
+
+                <div class="search__icon" aria-hidden="true">
+                    <span></span>
+                </div>
+
+                <input type="text" id="cityInput" class="search__input" placeholder="Search a city..."
+                    autocomplete="off" aria-label="City name">
+
+                <button type="submit" class="search__submit" aria-label="Search">
+                    <span>↵</span>
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- Current Weather -->
+        <section class="hero" id="currentWeather">
+
+            <div class="hero__location">
+
+                <p class="hero__eyebrow">
+                    CURRENT WEATHER
+                </p>
+
+                <h1 class="city-name" id="cityName">
+                    Peshawar
+                </h1>
+
+                <p class="weather-description" id="weatherDescription">
+                    Partly cloudy
+                </p>
+
+            </div>
+
+
+            <div class="hero__temperature">
+
+                <span class="temperature" id="temperature">
+                    27°
+                </span>
+
+            </div>
+
+
+            <div class="hero__condition">
+
+                <div class="weather-icon" id="weatherIcon">
+                    <!-- Dynamic weather icon -->
+                </div>
+
+                <div class="feels-like">
+                    <span class="feels-like__label">
+                        FEELS LIKE
+                    </span>
+
+                    <span class="feels-like__value" id="feelsLike">
+                        29°
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Weather Details -->
+        <section class="weather-details" aria-label="Weather details">
+
+            <article class="detail">
+
+                <span class="detail__label">
+                    HUMIDITY
+                </span>
+
+                <span class="detail__value" id="humidity">
+                    64%
+                </span>
+
+            </article>
+
+
+            <article class="detail">
+
+                <span class="detail__label">
+                    WIND
+                </span>
+
+                <span class="detail__value" id="wind">
+                    12 km/h
+                </span>
+
+            </article>
+
+
+            <article class="detail">
+
+                <span class="detail__label">
+                    PRESSURE
+                </span>
+
+                <span class="detail__value" id="pressure">
+                    1012 hPa
+                </span>
+
+            </article>
+
+
+            <article class="detail">
+
+                <span class="detail__label">
+                    VISIBILITY
+                </span>
+
+                <span class="detail__value" id="visibility">
+                    8.2 km
+                </span>
+
+            </article>
+
+        </section>
+
+
+        <!-- Forecast -->
+        <section class="forecast" aria-label="Weather forecast">
+
+            <div class="section-heading">
+
+                <span class="section-heading__title">
+                    FORECAST
+                </span>
+
+                <span class="section-heading__line"></span>
+
+                <span class="section-heading__meta">
+                    5 DAYS
+                </span>
+
+            </div>
+
+
+            <div class="forecast__list" id="forecastList">
+
+                <article class="forecast-day">
+
+                    <span class="forecast-day__name">
+                        MON
+                    </span>
+
+                    <div class="forecast-day__icon"></div>
+
+                    <span class="forecast-day__condition">
+                        Clear
+                    </span>
+
+                    <span class="forecast-day__temperature">
+                        28°
+                    </span>
+
+                </article>
+
+
+                <article class="forecast-day">
+
+                    <span class="forecast-day__name">
+                        TUE
+                    </span>
+
+                    <div class="forecast-day__icon"></div>
+
+                    <span class="forecast-day__condition">
+                        Cloudy
+                    </span>
+
+                    <span class="forecast-day__temperature">
+                        26°
+                    </span>
+
+                </article>
+
+
+                <article class="forecast-day">
+
+                    <span class="forecast-day__name">
+                        WED
+                    </span>
+
+                    <div class="forecast-day__icon"></div>
+
+                    <span class="forecast-day__condition">
+                        Rain
+                    </span>
+
+                    <span class="forecast-day__temperature">
+                        24°
+                    </span>
+
+                </article>
+
+
+                <article class="forecast-day">
+
+                    <span class="forecast-day__name">
+                        THU
+                    </span>
+
+                    <div class="forecast-day__icon"></div>
+
+                    <span class="forecast-day__condition">
+                        Cloudy
+                    </span>
+
+                    <span class="forecast-day__temperature">
+                        25°
+                    </span>
+
+                </article>
+
+
+                <article class="forecast-day">
+
+                    <span class="forecast-day__name">
+                        FRI
+                    </span>
+
+                    <div class="forecast-day__icon"></div>
+
+                    <span class="forecast-day__condition">
+                        Clear
+                    </span>
+
+                    <span class="forecast-day__temperature">
+                        29°
+                    </span>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="footer">
+
+            <span>AETHR</span>
+
+            <span class="footer__separator">/</span>
+
+            <span>WEATHER IN MOTION</span>
+
+            <span class="footer__separator">/</span>
+
+            <span id="lastUpdated">
+                UPDATED JUST NOW
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- GSAP -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+
+    <!-- Application -->
+    <script src="script.js"></script>
 
 </body>
 
