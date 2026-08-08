@@ -390,76 +390,134 @@ a {
 .hero {
     position: relative;
 
-    min-height: 440px;
-    margin-top: 65px;
+    min-height: 470px;
+    margin-top: 55px;
 
     display: grid;
-    grid-template-columns: 1fr 1.4fr 1fr;
+    grid-template-columns: 0.9fr 1.5fr 0.9fr;
     align-items: center;
 }
 
 
-/* Location */
+/* ---------------------------------------------------------
+   LOCATION
+   --------------------------------------------------------- */
 
 .hero__location {
     align-self: center;
-    padding-top: 25px;
+
+    padding-top: 30px;
+
+    position: relative;
+    z-index: 2;
 }
 
 .hero__eyebrow {
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 
     color: var(--text-dim);
 
-    font-size: 0.65rem;
+    font-size: 0.58rem;
     font-weight: 500;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.24em;
 }
 
 .city-name {
-    font-size: clamp(2.5rem, 5vw, 5rem);
+    max-width: 420px;
+
+    font-size: clamp(3rem, 5vw, 5.4rem);
     font-weight: 400;
-    line-height: 0.95;
-    letter-spacing: -0.055em;
+    line-height: 0.9;
+
+    letter-spacing: -0.065em;
 }
 
 .weather-description {
-    margin-top: 14px;
+    margin-top: 18px;
 
     color: var(--text-muted);
 
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 300;
+    letter-spacing: 0.01em;
+
     text-transform: capitalize;
 }
 
 
-/* Temperature */
+/* ---------------------------------------------------------
+   TEMPERATURE
+   --------------------------------------------------------- */
 
 .hero__temperature {
+    position: relative;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
+    height: 100%;
 }
 
+
+/* Atmospheric halo behind temperature */
+
+.hero__temperature::before {
+    content: "";
+
+    position: absolute;
+
+    width: 340px;
+    height: 340px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(circle,
+            rgba(168, 255, 234, 0.055) 0%,
+            rgba(168, 255, 234, 0.018) 35%,
+            transparent 70%);
+
+    filter: blur(10px);
+
+    pointer-events: none;
+}
+
+
+/* Temperature itself */
+
 .temperature {
+    position: relative;
+    z-index: 1;
+
     display: block;
 
     color: var(--text);
 
-    font-size: clamp(10rem, 20vw, 20rem);
+    font-size: clamp(10rem, 19vw, 19rem);
     font-weight: 300;
-    line-height: 0.75;
-    letter-spacing: -0.105em;
+
+    line-height: 0.72;
+
+    letter-spacing: -0.115em;
 
     white-space: nowrap;
 
     text-shadow:
-        0 0 80px rgba(168, 255, 234, 0.035);
+        0 0 70px rgba(168, 255, 234, 0.025);
+
+    will-change: transform;
 }
 
 
-/* Condition */
+/* ---------------------------------------------------------
+   CONDITION
+   --------------------------------------------------------- */
 
 .hero__condition {
     justify-self: end;
@@ -468,30 +526,87 @@ a {
     flex-direction: column;
     align-items: center;
 
-    min-width: 130px;
+    min-width: 140px;
+
+    position: relative;
+    z-index: 2;
 }
 
-.weather-icon {
-    width: 92px;
-    height: 92px;
 
-    margin-bottom: 26px;
+/* Weather visual container */
+
+.weather-icon {
+    position: relative;
+
+    width: 105px;
+    height: 105px;
+
+    margin-bottom: 24px;
 
     display: grid;
     place-items: center;
 
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+
     border-radius: 50%;
 
     background:
-        radial-gradient(circle,
+        radial-gradient(circle at 50% 45%,
             rgba(168, 255, 234, 0.07),
-            transparent 65%);
+            rgba(255, 255, 255, 0.015) 50%,
+            transparent 75%);
 
     box-shadow:
-        inset 0 0 30px rgba(255, 255, 255, 0.015),
-        0 0 50px rgba(168, 255, 234, 0.035);
+        inset 0 0 35px rgba(255, 255, 255, 0.015),
+        0 0 70px rgba(168, 255, 234, 0.025);
+
+    overflow: hidden;
+
+    will-change: transform;
 }
+
+
+/* Outer atmospheric ring */
+
+.weather-icon::before {
+    content: "";
+
+    position: absolute;
+    inset: 7px;
+
+    border: 1px solid rgba(255, 255, 255, 0.035);
+
+    border-radius: 50%;
+}
+
+
+/* Small orbit */
+
+.weather-icon::after {
+    content: "";
+
+    position: absolute;
+
+    width: 5px;
+    height: 5px;
+
+    top: 15px;
+    right: 25px;
+
+    border-radius: 50%;
+
+    background: var(--accent);
+
+    box-shadow:
+        0 0 12px var(--accent);
+
+    opacity: 0.7;
+}
+
+
+/* ---------------------------------------------------------
+   FEELS LIKE
+   --------------------------------------------------------- */
 
 .feels-like {
     display: flex;
@@ -503,17 +618,20 @@ a {
 .feels-like__label {
     color: var(--text-dim);
 
-    font-size: 0.58rem;
-    letter-spacing: 0.18em;
+    font-size: 0.55rem;
+    font-weight: 500;
+
+    letter-spacing: 0.2em;
 }
 
 .feels-like__value {
     color: var(--text-muted);
 
     font-size: 1rem;
-    font-weight: 400;
-}
+    font-weight: 300;
 
+    letter-spacing: -0.02em;
+}
 
 /* ---------------------------------------------------------
    10. WEATHER DETAILS
