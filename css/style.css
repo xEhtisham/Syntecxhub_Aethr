@@ -1005,12 +1005,22 @@ a {
     }
 
     .forecast__list {
+        display: flex;
+
         overflow-x: auto;
-        grid-template-columns: repeat(5, minmax(160px, 1fr));
+
+        scrollbar-width: none;
+
+        border-right: 0;
+    }
+
+    .forecast__list::-webkit-scrollbar {
+        display: none;
     }
 
     .forecast-day {
-        min-width: 160px;
+        flex: 0 0 180px;
+        min-width: 180px;
     }
 }
 
