@@ -360,3 +360,30 @@ function updateAtmosphere(weather) {
     ease: "power2.out",
   });
 }
+/* =========================================================
+   HERO ATMOSPHERIC MOTION
+   ========================================================= */
+
+gsap.to(".hero__temperature::before", {
+  scale: 1.08,
+  opacity: 0.8,
+  duration: 5,
+  repeat: -1,
+  yoyo: true,
+  ease: "sine.inOut",
+});
+
+gsap.to(".hero__temperature", {
+  y: -3,
+  duration: 4,
+  repeat: -1,
+  yoyo: true,
+  ease: "sine.inOut",
+});
+
+gsap.to(".weather-icon::after", {
+  rotation: 360,
+  duration: 8,
+  repeat: -1,
+  ease: "none",
+});
