@@ -915,3 +915,282 @@ a:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =========================================================
+   AETHR — WEATHER VISUAL SYSTEM
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   BASE WEATHER VISUAL
+   --------------------------------------------------------- */
+
+.weather-visual {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   CLEAR / SUN
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="clear"] .weather-visual::before {
+    content: "";
+
+    position: absolute;
+    width: 34px;
+    height: 34px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: var(--accent);
+
+    box-shadow:
+        0 0 25px rgba(168, 255, 234, 0.45),
+        0 0 55px rgba(168, 255, 234, 0.18);
+}
+
+.weather-icon[data-weather="clear"] .weather-visual::after {
+    content: "";
+
+    position: absolute;
+    inset: 22px;
+
+    border: 1px solid rgba(168, 255, 234, 0.35);
+    border-radius: 50%;
+}
+
+
+/* ---------------------------------------------------------
+   CLOUDS
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="clouds"] .weather-visual::before {
+    content: "";
+
+    position: absolute;
+
+    width: 48px;
+    height: 20px;
+
+    left: 50%;
+    top: 53%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 20px;
+
+    background: rgba(245, 247, 250, 0.75);
+
+    box-shadow:
+        -16px -8px 0 -3px rgba(245, 247, 250, 0.65),
+        8px -10px 0 2px rgba(245, 247, 250, 0.8);
+
+    filter: blur(0.3px);
+}
+
+.weather-icon[data-weather="clouds"] .weather-visual::after {
+    content: "";
+
+    position: absolute;
+
+    width: 65px;
+    height: 65px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: rgba(168, 255, 234, 0.04);
+    filter: blur(10px);
+}
+
+
+/* ---------------------------------------------------------
+   RAIN
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="rain"] .weather-visual::before {
+    content: "";
+
+    position: absolute;
+
+    width: 46px;
+    height: 18px;
+
+    left: 50%;
+    top: 35%;
+
+    transform: translateX(-50%);
+
+    border-radius: 20px;
+
+    background: rgba(200, 220, 230, 0.7);
+
+    box-shadow:
+        -14px -6px 0 -2px rgba(200, 220, 230, 0.65),
+        10px -8px 0 1px rgba(200, 220, 230, 0.75);
+}
+
+.weather-icon[data-weather="rain"] .weather-visual::after {
+    content: "///";
+
+    position: absolute;
+
+    left: 50%;
+    top: 52%;
+
+    transform: translateX(-50%) rotate(-12deg);
+
+    color: var(--accent);
+
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 6px;
+
+    text-shadow:
+        0 0 12px rgba(168, 255, 234, 0.45);
+}
+
+
+/* ---------------------------------------------------------
+   SNOW
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="snow"] .weather-visual::before {
+    content: "·  ·  ·";
+
+    position: absolute;
+
+    top: 31%;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    color: var(--text);
+
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+
+    text-shadow:
+        0 0 15px rgba(255, 255, 255, 0.35);
+}
+
+.weather-icon[data-weather="snow"] .weather-visual::after {
+    content: "·  ·  ·";
+
+    position: absolute;
+
+    top: 52%;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    color: var(--accent);
+
+    font-size: 1.2rem;
+    letter-spacing: 7px;
+}
+
+
+/* ---------------------------------------------------------
+   THUNDERSTORM
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="thunderstorm"] .weather-visual::before {
+    content: "";
+
+    position: absolute;
+
+    width: 50px;
+    height: 20px;
+
+    left: 50%;
+    top: 35%;
+
+    transform: translateX(-50%);
+
+    border-radius: 20px;
+
+    background: #777b88;
+
+    box-shadow:
+        -15px -7px 0 -2px #666b78,
+        10px -8px 0 1px #858997;
+}
+
+.weather-icon[data-weather="thunderstorm"] .weather-visual::after {
+    content: "ϟ";
+
+    position: absolute;
+
+    left: 50%;
+    top: 47%;
+
+    transform: translateX(-50%);
+
+    color: #c4b5fd;
+
+    font-size: 2.2rem;
+    font-weight: 300;
+
+    text-shadow:
+        0 0 15px rgba(167, 139, 250, 0.8),
+        0 0 35px rgba(167, 139, 250, 0.35);
+}
+
+
+/* ---------------------------------------------------------
+   MIST / FOG
+   --------------------------------------------------------- */
+
+.weather-icon[data-weather="mist"] .weather-visual::before,
+.weather-icon[data-weather="mist"] .weather-visual::after {
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+
+    width: 58px;
+    height: 1px;
+
+    transform: translateX(-50%);
+
+    background: rgba(245, 247, 250, 0.55);
+
+    box-shadow:
+        0 12px 0 rgba(245, 247, 250, 0.3),
+        0 24px 0 rgba(245, 247, 250, 0.18);
+}
+
+.weather-icon[data-weather="mist"] .weather-visual::before {
+    top: 34%;
+}
+
+.weather-icon[data-weather="mist"] .weather-visual::after {
+    top: 45%;
+}
+
+
+/* ---------------------------------------------------------
+   WEATHER ICON STATE TRANSITION
+   --------------------------------------------------------- */
+
+.weather-icon {
+    overflow: hidden;
+    transition:
+        border-color 0.8s ease,
+        background 0.8s ease,
+        box-shadow 0.8s ease;
+}

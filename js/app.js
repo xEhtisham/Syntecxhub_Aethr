@@ -263,3 +263,100 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 });
+/* =========================================================
+   AETHR — WEATHER STATE SYSTEM
+   ========================================================= */
+
+const weatherIcon = document.getElementById("weatherIcon");
+
+function setWeatherState(weather) {
+  if (!weatherIcon) return;
+
+  const states = ["clear", "clouds", "rain", "snow", "thunderstorm", "mist"];
+
+  const state = states.includes(weather) ? weather : "clear";
+
+  // Animate current visual out
+  gsap.to(weatherIcon, {
+    scale: 0.8,
+    opacity: 0,
+    duration: 0.35,
+    ease: "power2.in",
+    onComplete: () => {
+      weatherIcon.dataset.weather = state;
+
+      updateAtmosphere(state);
+
+      // Animate new state in
+      gsap.fromTo(
+        weatherIcon,
+        {
+          scale: 0.8,
+          opacity: 0,
+          rotation: -8,
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          rotation: 0,
+          duration: 0.8,
+          ease: "back.out(1.5)",
+        },
+      );
+    },
+  });
+}
+/* =========================================================
+   TEMPORARY WEATHER TEST
+   Remove this after API integration.
+   ========================================================= */
+
+setTimeout(() => {
+  setWeatherState("rain");
+}, 3000);
+function updateAtmosphere(weather) {
+  const atmosphere = document.querySelector(".atmosphere");
+
+  if (!atmosphere) return;
+
+  const colors = {
+    clear: {
+      primary: "#A8FFEA",
+      secondary: "#A78BFA",
+    },
+
+    clouds: {
+      primary: "#B8C7D9",
+      secondary: "#8FA6C9",
+    },
+
+    rain: {
+      primary: "#5DE2E7",
+      secondary: "#6D7CFF",
+    },
+
+    snow: {
+      primary: "#DDF7FF",
+      secondary: "#A9C8FF",
+    },
+
+    thunderstorm: {
+      primary: "#8B7CFF",
+      secondary: "#5A4FBF",
+    },
+
+    mist: {
+      primary: "#C4CBD4",
+      secondary: "#7E8794",
+    },
+  };
+
+  const palette = colors[weather] || colors.clear;
+
+  gsap.to(":root", {
+    "--accent": palette.primary,
+    "--accent-secondary": palette.secondary,
+    duration: 1.5,
+    ease: "power2.out",
+  });
+}
