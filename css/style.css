@@ -1726,3 +1726,32 @@ a:focus-visible {
 .unit-toggle button:active {
     transform: scale(0.94);
 }
+
+/* =========================================================
+   AETHR — SEARCH INPUT FOCUS
+   ========================================================= */
+
+.search__input {
+    outline: none;
+    border: none;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+
+.search__input:focus,
+.search__input:focus-visible,
+.search__input:active {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+
+/* Keep the search container itself clean */
+
+.search__form:focus-within {
+    outline: none;
+    box-shadow: none;
+}
