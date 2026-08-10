@@ -1,12 +1,33 @@
 /* =========================================================
-   AETHR — APP
-   GSAP Motion System
+   AETHR — WEATHER APP
    ========================================================= */
 
+/* ---------------------------------------------------------
+   01. API CONFIGURATION
+   --------------------------------------------------------- */
+
+const API_KEY = "YOUR_OPENWEATHERMAP_API_KEY";
+const WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+/* ---------------------------------------------------------
+   02. DOM ELEMENTS
+   --------------------------------------------------------- */
+
+const weatherIcon = document.getElementById("weatherIcon");
+
+const appStatus = document.getElementById("appStatus");
+const statusLabel = document.getElementById("statusLabel");
+const statusMessage = document.getElementById("statusMessage");
+
+const searchForm = document.getElementById("searchForm");
+const cityInput = document.getElementById("cityInput");
+
+/* ---------------------------------------------------------
+   03. GSAP — PAGE ENTRANCE
+   --------------------------------------------------------- */
+
 document.addEventListener("DOMContentLoaded", () => {
-  // -----------------------------------------------------
-  // GSAP INITIAL STATE
-  // -----------------------------------------------------
+  // Initial positions
 
   gsap.set(".logo", {
     opacity: 0,
@@ -73,9 +94,8 @@ document.addEventListener("DOMContentLoaded", () => {
     opacity: 0,
     y: 15,
   });
-  // -----------------------------------------------------
-  // PAGE ENTRANCE
-  // -----------------------------------------------------
+
+  // Entrance timeline
 
   const entrance = gsap.timeline({
     defaults: {
@@ -84,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   entrance
+
     .to(".logo", {
       opacity: 1,
       y: 0,
@@ -215,9 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
       "-=0.2",
     );
 
-  // -----------------------------------------------------
-  // AMBIENT BACKGROUND
-  // -----------------------------------------------------
+  /* -----------------------------------------------------
+       AMBIENT BACKGROUND MOTION
+       ----------------------------------------------------- */
 
   gsap.to(".atmosphere__glow--one", {
     x: "8vw",
@@ -239,9 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 
-  // -----------------------------------------------------
-  // TEMPERATURE MICRO-MOTION
-  // -----------------------------------------------------
+  /* -----------------------------------------------------
+       TEMPERATURE MICRO MOTION
+       ----------------------------------------------------- */
 
   gsap.to(".temperature", {
     y: -4,
@@ -251,9 +272,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 
-  // -----------------------------------------------------
-  // WEATHER ICON MICRO-MOTION
-  // -----------------------------------------------------
+  /* -----------------------------------------------------
+       WEATHER ICON MICRO MOTION
+       ----------------------------------------------------- */
 
   gsap.to(".weather-icon", {
     y: -5,
@@ -263,11 +284,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 });
-/* =========================================================
-   AETHR — WEATHER STATE SYSTEM
-   ========================================================= */
 
-const weatherIcon = document.getElementById("weatherIcon");
+/* ---------------------------------------------------------
+   04. WEATHER STATE SYSTEM
+   --------------------------------------------------------- */
 
 function setWeatherState(weather) {
   if (!weatherIcon) return;
@@ -276,25 +296,26 @@ function setWeatherState(weather) {
 
   const state = states.includes(weather) ? weather : "clear";
 
-  // Animate current visual out
   gsap.to(weatherIcon, {
     scale: 0.8,
     opacity: 0,
     duration: 0.35,
     ease: "power2.in",
+
     onComplete: () => {
       weatherIcon.dataset.weather = state;
 
       updateAtmosphere(state);
 
-      // Animate new state in
       gsap.fromTo(
         weatherIcon,
+
         {
           scale: 0.8,
           opacity: 0,
           rotation: -8,
         },
+
         {
           scale: 1,
           opacity: 1,
@@ -306,18 +327,15 @@ function setWeatherState(weather) {
     },
   });
 }
-/* =========================================================
-   TEMPORARY WEATHER TEST
-   Remove this after API integration.
-   ========================================================= */
 
-setTimeout(() => {
-  setWeatherState("rain");
-}, 3000);
+/* ---------------------------------------------------------
+   05. ATMOSPHERE / WEATHER COLORS
+   --------------------------------------------------------- */
+
 function updateAtmosphere(weather) {
-  const atmosphere = document.querySelector(".atmosphere");
-
-  if (!atmosphere) return;
+  if (!document.querySelector(".atmosphere")) {
+    return;
+  }
 
   const colors = {
     clear: {
@@ -356,44 +374,15 @@ function updateAtmosphere(weather) {
   gsap.to(":root", {
     "--accent": palette.primary,
     "--accent-secondary": palette.secondary,
+
     duration: 1.5,
     ease: "power2.out",
   });
 }
-/* =========================================================
-   HERO ATMOSPHERIC MOTION
-   ========================================================= */
 
-gsap.to(".hero__temperature::before", {
-  scale: 1.08,
-  opacity: 0.8,
-  duration: 5,
-  repeat: -1,
-  yoyo: true,
-  ease: "sine.inOut",
-});
-
-gsap.to(".hero__temperature", {
-  y: -3,
-  duration: 4,
-  repeat: -1,
-  yoyo: true,
-  ease: "sine.inOut",
-});
-
-gsap.to(".weather-icon::after", {
-  rotation: 360,
-  duration: 8,
-  repeat: -1,
-  ease: "none",
-});
-/* =========================================================
-   AETHR — APPLICATION STATUS
-   ========================================================= */
-
-const appStatus = document.getElementById("appStatus");
-const statusLabel = document.getElementById("statusLabel");
-const statusMessage = document.getElementById("statusMessage");
+/* ---------------------------------------------------------
+   06. APPLICATION STATUS
+   --------------------------------------------------------- */
 
 function showStatus(label, message) {
   if (!appStatus) return;
@@ -424,4 +413,159 @@ function hideStatus() {
   setTimeout(() => {
     appStatus.classList.remove("is-error");
   }, 500);
+}
+
+/* ---------------------------------------------------------
+   07. OPENWEATHERMAP API
+   --------------------------------------------------------- */
+
+async function fetchWeather(city) {
+  const url = `${WEATHER_API_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+
+  // Safe console logging — API key is hidden
+
+  console.log("AETHR API URL:", url.replace(API_KEY, "[HIDDEN]"));
+
+  const response = await fetch(url);
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Invalid response from weather service.");
+  }
+
+  console.log("AETHR API RESPONSE:", data);
+  console.log("AETHR HTTP STATUS:", response.status);
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Invalid or inactive API key.");
+    }
+
+    if (response.status === 404) {
+      throw new Error("City not found.");
+    }
+
+    if (response.status === 429) {
+      throw new Error("API request limit reached.");
+    }
+
+    throw new Error(
+      data.message || `Weather request failed (${response.status}).`,
+    );
+  }
+
+  return data;
+}
+
+/* ---------------------------------------------------------
+   08. UPDATE WEATHER UI
+   --------------------------------------------------------- */
+
+function updateWeatherUI(data) {
+  const cityName = document.getElementById("cityName");
+
+  const weatherDescription = document.getElementById("weatherDescription");
+
+  const temperature = document.getElementById("temperature");
+
+  const feelsLike = document.getElementById("feelsLike");
+
+  const humidity = document.getElementById("humidity");
+
+  const wind = document.getElementById("wind");
+
+  const pressure = document.getElementById("pressure");
+
+  const visibility = document.getElementById("visibility");
+
+  /* -----------------------------------------------------
+       Basic weather data
+       ----------------------------------------------------- */
+
+  cityName.textContent = data.name;
+
+  weatherDescription.textContent = data.weather[0].description;
+
+  temperature.textContent = `${Math.round(data.main.temp)}°`;
+
+  feelsLike.textContent = `${Math.round(data.main.feels_like)}°`;
+
+  humidity.textContent = `${data.main.humidity}%`;
+
+  wind.textContent = `${Math.round(data.wind.speed * 3.6)} km/h`;
+
+  pressure.textContent = `${data.main.pressure} hPa`;
+
+  visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
+
+  /* -----------------------------------------------------
+       Determine AETHR weather state
+       ----------------------------------------------------- */
+
+  const condition = data.weather[0].main.toLowerCase();
+
+  let weatherState = "clear";
+
+  if (condition.includes("thunderstorm")) {
+    weatherState = "thunderstorm";
+  } else if (condition.includes("rain") || condition.includes("drizzle")) {
+    weatherState = "rain";
+  } else if (condition.includes("snow")) {
+    weatherState = "snow";
+  } else if (condition.includes("cloud")) {
+    weatherState = "clouds";
+  } else if (
+    [
+      "mist",
+      "smoke",
+      "haze",
+      "dust",
+      "fog",
+      "sand",
+      "ash",
+      "squall",
+      "tornado",
+    ].some((type) => condition.includes(type))
+  ) {
+    weatherState = "mist";
+  }
+
+  setWeatherState(weatherState);
+}
+
+/* ---------------------------------------------------------
+   09. SEARCH
+   --------------------------------------------------------- */
+
+if (searchForm && cityInput) {
+  searchForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const city = cityInput.value.trim();
+
+    if (!city) {
+      cityInput.focus();
+
+      return;
+    }
+
+    showStatus("SEARCHING ATMOSPHERE", `Reading conditions in ${city}...`);
+
+    try {
+      const weatherData = await fetchWeather(city);
+
+      updateWeatherUI(weatherData);
+
+      hideStatus();
+
+      cityInput.value = "";
+    } catch (error) {
+      console.error("AETHR WEATHER ERROR:", error);
+
+      showError("WEATHER ERROR", error.message);
+    }
+  });
 }
