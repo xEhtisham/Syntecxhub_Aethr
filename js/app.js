@@ -387,3 +387,41 @@ gsap.to(".weather-icon::after", {
   repeat: -1,
   ease: "none",
 });
+/* =========================================================
+   AETHR — APPLICATION STATUS
+   ========================================================= */
+
+const appStatus = document.getElementById("appStatus");
+const statusLabel = document.getElementById("statusLabel");
+const statusMessage = document.getElementById("statusMessage");
+
+function showStatus(label, message) {
+  if (!appStatus) return;
+
+  appStatus.classList.remove("is-error");
+
+  statusLabel.textContent = label;
+  statusMessage.textContent = message;
+
+  appStatus.classList.add("is-visible");
+}
+
+function showError(label, message) {
+  if (!appStatus) return;
+
+  statusLabel.textContent = label;
+  statusMessage.textContent = message;
+
+  appStatus.classList.add("is-error");
+  appStatus.classList.add("is-visible");
+}
+
+function hideStatus() {
+  if (!appStatus) return;
+
+  appStatus.classList.remove("is-visible");
+
+  setTimeout(() => {
+    appStatus.classList.remove("is-error");
+  }, 500);
+}
