@@ -6,8 +6,11 @@
    01. API CONFIGURATION
    --------------------------------------------------------- */
 
-const API_KEY = "YOUR_OPENWEATHERMAP_API_KEY";
+const API_KEY = "";
+
 const WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+const FORECAST_API_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
 /* ---------------------------------------------------------
    02. DOM ELEMENTS
@@ -22,13 +25,13 @@ const statusMessage = document.getElementById("statusMessage");
 const searchForm = document.getElementById("searchForm");
 const cityInput = document.getElementById("cityInput");
 
+const forecastList = document.getElementById("forecastList");
+
 /* ---------------------------------------------------------
    03. GSAP — PAGE ENTRANCE
    --------------------------------------------------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Initial positions
-
   gsap.set(".logo", {
     opacity: 0,
     y: -15,
@@ -95,8 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
     y: 15,
   });
 
-  // Entrance timeline
-
   const entrance = gsap.timeline({
     defaults: {
       ease: "power3.out",
@@ -104,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   entrance
-
     .to(".logo", {
       opacity: 1,
       y: 0,
@@ -236,9 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "-=0.2",
     );
 
-  /* -----------------------------------------------------
-       AMBIENT BACKGROUND MOTION
-       ----------------------------------------------------- */
+  /* Ambient background */
 
   gsap.to(".atmosphere__glow--one", {
     x: "8vw",
@@ -260,9 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 
-  /* -----------------------------------------------------
-       TEMPERATURE MICRO MOTION
-       ----------------------------------------------------- */
+  /* Temperature motion */
 
   gsap.to(".temperature", {
     y: -4,
@@ -272,9 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ease: "sine.inOut",
   });
 
-  /* -----------------------------------------------------
-       WEATHER ICON MICRO MOTION
-       ----------------------------------------------------- */
+  /* Weather icon motion */
 
   gsap.to(".weather-icon", {
     y: -5,
@@ -286,11 +280,56 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ---------------------------------------------------------
-   04. WEATHER STATE SYSTEM
+   04. WEATHER STATE
+   --------------------------------------------------------- */
+
+function getWeatherState(condition) {
+  condition = condition.toLowerCase();
+
+  if (condition.includes("thunderstorm")) {
+    return "thunderstorm";
+  }
+
+  if (condition.includes("rain") || condition.includes("drizzle")) {
+    return "rain";
+  }
+
+  if (condition.includes("snow")) {
+    return "snow";
+  }
+
+  if (condition.includes("cloud")) {
+    return "clouds";
+  }
+
+  if (
+    [
+      "mist",
+      "smoke",
+      "haze",
+      "dust",
+      "fog",
+      "sand",
+      "ash",
+      "squall",
+      "tornado",
+    ].some((type) => condition.includes(type))
+  ) {
+    return "mist";
+  }
+
+  return "clear";
+}
+
+/* ---------------------------------------------------------
+   05. SET WEATHER STATE
    --------------------------------------------------------- */
 
 function setWeatherState(weather) {
-  if (!weatherIcon) return;
+  if (!weatherIcon) {
+    console.warn("AETHR: weatherIcon not found.");
+    return;
+  }
 
   const states = ["clear", "clouds", "rain", "snow", "thunderstorm", "mist"];
 
@@ -329,14 +368,10 @@ function setWeatherState(weather) {
 }
 
 /* ---------------------------------------------------------
-   05. ATMOSPHERE / WEATHER COLORS
+   06. ATMOSPHERE
    --------------------------------------------------------- */
 
 function updateAtmosphere(weather) {
-  if (!document.querySelector(".atmosphere")) {
-    return;
-  }
-
   const colors = {
     clear: {
       primary: "#A8FFEA",
@@ -381,11 +416,14 @@ function updateAtmosphere(weather) {
 }
 
 /* ---------------------------------------------------------
-   06. APPLICATION STATUS
+   07. APPLICATION STATUS
    --------------------------------------------------------- */
 
 function showStatus(label, message) {
-  if (!appStatus) return;
+  if (!appStatus) {
+    console.warn("AETHR: appStatus not found.");
+    return;
+  }
 
   appStatus.classList.remove("is-error");
 
@@ -396,7 +434,10 @@ function showStatus(label, message) {
 }
 
 function showError(label, message) {
-  if (!appStatus) return;
+  if (!appStatus) {
+    console.error("AETHR ERROR:", label, message);
+    return;
+  }
 
   statusLabel.textContent = label;
   statusMessage.textContent = message;
@@ -416,28 +457,24 @@ function hideStatus() {
 }
 
 /* ---------------------------------------------------------
-   07. OPENWEATHERMAP API
+   08. CURRENT WEATHER API
    --------------------------------------------------------- */
 
 async function fetchWeather(city) {
   const url = `${WEATHER_API_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
 
-  // Safe console logging — API key is hidden
-
-  console.log("AETHR API URL:", url.replace(API_KEY, "[HIDDEN]"));
+  console.log(
+    "AETHR CURRENT WEATHER REQUEST:",
+    url.replace(API_KEY, "[HIDDEN]"),
+  );
 
   const response = await fetch(url);
 
-  let data;
+  const data = await response.json();
 
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Invalid response from weather service.");
-  }
+  console.log("AETHR CURRENT WEATHER:", data);
 
-  console.log("AETHR API RESPONSE:", data);
-  console.log("AETHR HTTP STATUS:", response.status);
+  console.log("AETHR CURRENT STATUS:", response.status);
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -461,7 +498,49 @@ async function fetchWeather(city) {
 }
 
 /* ---------------------------------------------------------
-   08. UPDATE WEATHER UI
+   09. FORECAST API
+   --------------------------------------------------------- */
+
+async function fetchForecast(city) {
+  const url = `${FORECAST_API_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+
+  console.log("AETHR FORECAST REQUEST:", url.replace(API_KEY, "[HIDDEN]"));
+
+  const response = await fetch(url);
+
+  const data = await response.json();
+
+  console.log("AETHR FORECAST RESPONSE:", data);
+
+  console.log("AETHR FORECAST STATUS:", response.status);
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Forecast API rejected the API key.");
+    }
+
+    if (response.status === 404) {
+      throw new Error("Forecast city not found.");
+    }
+
+    if (response.status === 429) {
+      throw new Error("Forecast API request limit reached.");
+    }
+
+    throw new Error(
+      data.message || `Forecast request failed (${response.status}).`,
+    );
+  }
+
+  if (!Array.isArray(data.list)) {
+    throw new Error("Forecast data is missing.");
+  }
+
+  return data;
+}
+
+/* ---------------------------------------------------------
+   10. UPDATE CURRENT WEATHER
    --------------------------------------------------------- */
 
 function updateWeatherUI(data) {
@@ -481,10 +560,6 @@ function updateWeatherUI(data) {
 
   const visibility = document.getElementById("visibility");
 
-  /* -----------------------------------------------------
-       Basic weather data
-       ----------------------------------------------------- */
-
   cityName.textContent = data.name;
 
   weatherDescription.textContent = data.weather[0].description;
@@ -501,43 +576,142 @@ function updateWeatherUI(data) {
 
   visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
 
-  /* -----------------------------------------------------
-       Determine AETHR weather state
-       ----------------------------------------------------- */
+  const condition = data.weather[0].main;
 
-  const condition = data.weather[0].main.toLowerCase();
-
-  let weatherState = "clear";
-
-  if (condition.includes("thunderstorm")) {
-    weatherState = "thunderstorm";
-  } else if (condition.includes("rain") || condition.includes("drizzle")) {
-    weatherState = "rain";
-  } else if (condition.includes("snow")) {
-    weatherState = "snow";
-  } else if (condition.includes("cloud")) {
-    weatherState = "clouds";
-  } else if (
-    [
-      "mist",
-      "smoke",
-      "haze",
-      "dust",
-      "fog",
-      "sand",
-      "ash",
-      "squall",
-      "tornado",
-    ].some((type) => condition.includes(type))
-  ) {
-    weatherState = "mist";
-  }
+  const weatherState = getWeatherState(condition);
 
   setWeatherState(weatherState);
 }
 
 /* ---------------------------------------------------------
-   09. SEARCH
+   11. UPDATE FORECAST
+   --------------------------------------------------------- */
+
+function updateForecastUI(data) {
+  if (!forecastList) {
+    throw new Error("Forecast container #forecastList was not found.");
+  }
+
+  if (!data.list || data.list.length === 0) {
+    throw new Error("No forecast data was returned.");
+  }
+
+  console.log(
+    "AETHR: Building forecast...",
+    data.list.length,
+    "forecast entries received.",
+  );
+
+  /*
+       Group forecasts by local calendar date.
+    */
+
+  const dailyForecasts = {};
+
+  data.list.forEach((item) => {
+    const date = new Date(item.dt * 1000);
+
+    const dateKey = date.toLocaleDateString("en-CA");
+
+    if (!dailyForecasts[dateKey]) {
+      dailyForecasts[dateKey] = [];
+    }
+
+    dailyForecasts[dateKey].push(item);
+  });
+
+  const days = Object.values(dailyForecasts).slice(0, 5);
+
+  console.log("AETHR: Daily forecast groups:", days.length);
+
+  forecastList.innerHTML = "";
+
+  days.forEach((day, index) => {
+    /*
+           Find the forecast closest to 12:00.
+        */
+
+    const middayForecast = day.reduce((closest, current) => {
+      const currentHour = new Date(current.dt * 1000).getHours();
+
+      const closestHour = new Date(closest.dt * 1000).getHours();
+
+      return Math.abs(currentHour - 12) < Math.abs(closestHour - 12)
+        ? current
+        : closest;
+    });
+
+    const date = new Date(middayForecast.dt * 1000);
+
+    const dayName =
+      index === 0
+        ? "TODAY"
+        : date
+            .toLocaleDateString("en-US", {
+              weekday: "short",
+            })
+            .toUpperCase();
+
+    const temperature = Math.round(middayForecast.main.temp);
+
+    const condition = middayForecast.weather[0].description;
+
+    const weatherState = getWeatherState(middayForecast.weather[0].main);
+
+    const forecastItem = document.createElement("article");
+
+    forecastItem.className = "forecast-day";
+
+    forecastItem.innerHTML = `
+
+            <span class="forecast-day__name">
+                ${dayName}
+            </span>
+
+            <div
+                class="forecast-day__icon"
+                data-weather="${weatherState}"
+            ></div>
+
+            <span class="forecast-day__condition">
+                ${condition}
+            </span>
+
+            <span class="forecast-day__temperature">
+                ${temperature}°
+            </span>
+
+        `;
+
+    forecastList.appendChild(forecastItem);
+  });
+
+  /*
+       Animate generated forecast items.
+    */
+
+  gsap.fromTo(
+    forecastList.querySelectorAll(".forecast-day"),
+
+    {
+      opacity: 0,
+      y: 20,
+    },
+
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      stagger: 0.08,
+      ease: "power3.out",
+    },
+  );
+
+  console.log("AETHR: Forecast UI updated successfully.");
+}
+
+/* ---------------------------------------------------------
+   12. SEARCH
    --------------------------------------------------------- */
 
 if (searchForm && cityInput) {
@@ -555,9 +729,19 @@ if (searchForm && cityInput) {
     showStatus("SEARCHING ATMOSPHERE", `Reading conditions in ${city}...`);
 
     try {
+      console.log("AETHR: Searching for:", city);
+
       const weatherData = await fetchWeather(city);
 
+      console.log("AETHR: Current weather received.");
+
       updateWeatherUI(weatherData);
+
+      const forecastData = await fetchForecast(city);
+
+      console.log("AETHR: Forecast received.");
+
+      updateForecastUI(forecastData);
 
       hideStatus();
 
@@ -568,4 +752,6 @@ if (searchForm && cityInput) {
       showError("WEATHER ERROR", error.message);
     }
   });
+} else {
+  console.error("AETHR: Search form or city input not found.");
 }
