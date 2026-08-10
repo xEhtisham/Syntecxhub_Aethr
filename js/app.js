@@ -6,7 +6,7 @@
    01. API CONFIGURATION
    --------------------------------------------------------- */
 
-const API_KEY = "";
+const API_KEY = AETHR_CONFIG.API_KEY;
 
 const WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather";
 
