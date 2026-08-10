@@ -223,6 +223,22 @@ a {
     background: var(--text);
 }
 
+.unit-toggle button {
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        transform 0.3s ease;
+}
+
+.unit-toggle button.active {
+    background: var(--text);
+    color: var(--background);
+}
+
+.unit-toggle button:hover {
+    transform: translateY(-1px);
+}
+
 
 /* ---------------------------------------------------------
    07. LOCATION BUTTON

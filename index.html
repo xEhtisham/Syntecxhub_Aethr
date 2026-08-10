@@ -39,10 +39,17 @@
 
             <div class="header__right">
 
-                <button class="unit-toggle" type="button" aria-label="Toggle temperature unit">
-                    <span class="unit-toggle__active">°C</span>
-                    <span>°F</span>
-                </button>
+                <div class="unit-toggle">
+
+                    <button id="celsiusBtn" class="active" type="button">
+                        °C
+                    </button>
+
+                    <button id="fahrenheitBtn" type="button">
+                        °F
+                    </button>
+
+                </div>
 
                 <button class="location-button" type="button" aria-label="Use current location">
                     <span class="location-button__icon">⌖</span>

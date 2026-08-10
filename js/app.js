@@ -28,6 +28,15 @@ const cityInput = document.getElementById("cityInput");
 const forecastList = document.getElementById("forecastList");
 
 /* ---------------------------------------------------------
+   TEMPERATURE UNIT
+   --------------------------------------------------------- */
+
+let currentUnit = "celsius";
+
+let currentWeatherData = null;
+let currentForecastData = null;
+
+/* ---------------------------------------------------------
    03. GSAP — PAGE ENTRANCE
    --------------------------------------------------------- */
 
@@ -538,7 +547,20 @@ async function fetchForecast(city) {
 
   return data;
 }
+/* ---------------------------------------------------------
+   TEMPERATURE CONVERSION
+   --------------------------------------------------------- */
 
+function celsiusToFahrenheit(celsius) {
+  return (celsius * 9) / 5 + 32;
+}
+
+function formatTemperature(celsius) {
+  const value =
+    currentUnit === "celsius" ? celsius : celsiusToFahrenheit(celsius);
+
+  return `${Math.round(value)}°`;
+}
 /* ---------------------------------------------------------
    10. UPDATE CURRENT WEATHER
    --------------------------------------------------------- */
@@ -564,9 +586,9 @@ function updateWeatherUI(data) {
 
   weatherDescription.textContent = data.weather[0].description;
 
-  temperature.textContent = `${Math.round(data.main.temp)}°`;
+  temperature.textContent = formatTemperature(data.main.temp);
 
-  feelsLike.textContent = `${Math.round(data.main.feels_like)}°`;
+  feelsLike.textContent = formatTemperature(data.main.feels_like);
 
   humidity.textContent = `${data.main.humidity}%`;
 
@@ -652,7 +674,7 @@ function updateForecastUI(data) {
             })
             .toUpperCase();
 
-    const temperature = Math.round(middayForecast.main.temp);
+    const temperature = formatTemperature(middayForecast.main.temp);
 
     const condition = middayForecast.weather[0].description;
 
@@ -678,7 +700,7 @@ function updateForecastUI(data) {
             </span>
 
             <span class="forecast-day__temperature">
-                ${temperature}°
+                ${temperature}
             </span>
 
         `;
@@ -733,11 +755,15 @@ if (searchForm && cityInput) {
 
       const weatherData = await fetchWeather(city);
 
+      currentWeatherData = weatherData;
+
       console.log("AETHR: Current weather received.");
 
       updateWeatherUI(weatherData);
 
       const forecastData = await fetchForecast(city);
+
+      currentForecastData = forecastData;
 
       console.log("AETHR: Forecast received.");
 
@@ -754,4 +780,47 @@ if (searchForm && cityInput) {
   });
 } else {
   console.error("AETHR: Search form or city input not found.");
+}
+/* ---------------------------------------------------------
+   °C / °F TOGGLE
+   --------------------------------------------------------- */
+
+const celsiusBtn = document.getElementById("celsiusBtn");
+
+const fahrenheitBtn = document.getElementById("fahrenheitBtn");
+
+function setTemperatureUnit(unit) {
+  currentUnit = unit;
+
+  if (celsiusBtn) {
+    celsiusBtn.classList.toggle("active", unit === "celsius");
+  }
+
+  if (fahrenheitBtn) {
+    fahrenheitBtn.classList.toggle("active", unit === "fahrenheit");
+  }
+
+  /*
+   * Redraw existing weather data
+   */
+
+  if (currentWeatherData) {
+    updateWeatherUI(currentWeatherData);
+  }
+
+  if (currentForecastData) {
+    updateForecastUI(currentForecastData);
+  }
+}
+
+if (celsiusBtn) {
+  celsiusBtn.addEventListener("click", () => {
+    setTemperatureUnit("celsius");
+  });
+}
+
+if (fahrenheitBtn) {
+  fahrenheitBtn.addEventListener("click", () => {
+    setTemperatureUnit("fahrenheit");
+  });
 }
