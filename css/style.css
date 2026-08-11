@@ -938,19 +938,6 @@ a {
 }
 
 
-.forecast-day:hover {
-    background: rgba(255, 255, 255, 0.018);
-}
-
-.forecast-day:hover::before {
-    width: 100%;
-}
-
-.forecast-day:hover::after {
-    opacity: 0.035;
-}
-
-
 /* ---------------------------------------------------------
    DAY
    --------------------------------------------------------- */
@@ -995,10 +982,7 @@ a {
         border-color 0.4s ease;
 }
 
-.forecast-day:hover .forecast-day__icon {
-    transform: translateY(-4px) scale(1.05);
-    border-color: rgba(168, 255, 234, 0.2);
-}
+
 
 
 /* ---------------------------------------------------------
@@ -1040,11 +1024,6 @@ a {
     transition:
         color 0.3s ease,
         transform 0.4s var(--ease-out);
-}
-
-.forecast-day:hover .forecast-day__temperature {
-    color: var(--accent);
-    transform: translateX(3px);
 }
 
 
@@ -1890,10 +1869,4 @@ a:focus-visible {
         transform 0.5s ease,
         opacity 0.3s ease;
 }
-
-
-.forecast-day:hover .forecast-icon__image {
-    transform: translateY(-4px) scale(1.08);
-    opacity: 1;
-    filter: invert(1);
-}
+
