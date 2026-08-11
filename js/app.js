@@ -290,6 +290,9 @@ document.addEventListener("DOMContentLoaded", () => {
     yoyo: true,
     ease: "sine.inOut",
   });
+  
+  /* Initial data load */
+  fetchUserLocation();
 });
 
 /* ---------------------------------------------------------
@@ -473,8 +476,13 @@ function hideStatus() {
    08. CURRENT WEATHER API
    --------------------------------------------------------- */
 
-async function fetchWeather(city) {
-  const url = `${WEATHER_API_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+async function fetchWeather(query) {
+  let url;
+  if (typeof query === "object" && query.lat && query.lon) {
+    url = `${WEATHER_API_URL}?lat=${query.lat}&lon=${query.lon}&appid=${API_KEY}&units=metric`;
+  } else {
+    url = `${WEATHER_API_URL}?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=metric`;
+  }
 
   console.log(
     "AETHR CURRENT WEATHER REQUEST:",
@@ -528,8 +536,13 @@ async function fetchSuggestions(query) {
    09. FORECAST API
    --------------------------------------------------------- */
 
-async function fetchForecast(city) {
-  const url = `${FORECAST_API_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+async function fetchForecast(query) {
+  let url;
+  if (typeof query === "object" && query.lat && query.lon) {
+    url = `${FORECAST_API_URL}?lat=${query.lat}&lon=${query.lon}&appid=${API_KEY}&units=metric`;
+  } else {
+    url = `${FORECAST_API_URL}?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=metric`;
+  }
 
   console.log("AETHR FORECAST REQUEST:", url.replace(API_KEY, "[HIDDEN]"));
 
@@ -777,52 +790,76 @@ function updateForecastUI(data) {
    12. SEARCH
    --------------------------------------------------------- */
 
+async function performSearch(query) {
+  showStatus("SEARCHING ATMOSPHERE", `Reading conditions...`);
+
+  try {
+    console.log("AETHR: Searching for:", query);
+
+    const weatherData = await fetchWeather(query);
+    currentWeatherData = weatherData;
+    console.log("AETHR: Current weather received.");
+    updateWeatherUI(weatherData);
+
+    const forecastData = await fetchForecast(query);
+    currentForecastData = forecastData;
+    console.log("AETHR: Forecast received.");
+    updateForecastUI(forecastData);
+
+    hideStatus();
+    
+    // Close suggestions on successful search
+    if (searchSuggestions) {
+      searchSuggestions.classList.remove("is-active");
+    }
+
+    if (cityInput) {
+      cityInput.value = "";
+    }
+  } catch (error) {
+    console.error("AETHR WEATHER ERROR:", error);
+    showError("WEATHER ERROR", error.message);
+  }
+}
+
+function fetchUserLocation() {
+  const defaultCity = "New York";
+
+  if (!navigator.geolocation) {
+    console.log("AETHR: Geolocation is not supported by your browser. Falling back to default.");
+    performSearch(defaultCity);
+    return;
+  }
+
+  showStatus("LOCATING", "Finding your coordinates...");
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      console.log(`AETHR: Geolocation successful (${lat}, ${lon}).`);
+      performSearch({ lat, lon });
+    },
+    (error) => {
+      console.log("AETHR: Geolocation failed or denied. Falling back to default.", error.message);
+      performSearch(defaultCity);
+    },
+    { timeout: 10000 }
+  );
+}
+
 if (searchForm && cityInput) {
-  searchForm.addEventListener("submit", async (event) => {
+  searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     const city = cityInput.value.trim();
 
     if (!city) {
       cityInput.focus();
-
       return;
     }
-
-    showStatus("SEARCHING ATMOSPHERE", `Reading conditions in ${city}...`);
-
-    try {
-      console.log("AETHR: Searching for:", city);
-
-      const weatherData = await fetchWeather(city);
-
-      currentWeatherData = weatherData;
-
-      console.log("AETHR: Current weather received.");
-
-      updateWeatherUI(weatherData);
-
-      const forecastData = await fetchForecast(city);
-
-      currentForecastData = forecastData;
-
-      console.log("AETHR: Forecast received.");
-
-      updateForecastUI(forecastData);
-
-      hideStatus();
-      
-      // Close suggestions on successful search
-      if (searchSuggestions) {
-        searchSuggestions.classList.remove("is-active");
-      }
-
-      cityInput.value = "";
-    } catch (error) {
-      console.error("AETHR WEATHER ERROR:", error);
-
-      showError("WEATHER ERROR", error.message);
-    }
+    
+    performSearch(city);
   });
 } else {
   console.error("AETHR: Search form or city input not found.");
