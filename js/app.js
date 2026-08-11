@@ -822,12 +822,30 @@ async function performSearch(query) {
   }
 }
 
-function fetchUserLocation() {
+async function fetchUserLocation() {
   const defaultCity = "New York";
 
+  const fallbackToIP = async () => {
+    try {
+      console.log("AETHR: Attempting IP-based geolocation fallback...");
+      const response = await fetch("https://get.geojs.io/v1/ip/geo.json");
+      if (!response.ok) throw new Error("IP Geolocation failed");
+      
+      const data = await response.json();
+      const lat = data.latitude;
+      const lon = data.longitude;
+      
+      console.log(`AETHR: IP Geolocation successful (${lat}, ${lon}).`);
+      performSearch({ lat, lon });
+    } catch (error) {
+      console.log("AETHR: IP Geolocation failed too. Falling back to default.");
+      performSearch(defaultCity);
+    }
+  };
+
   if (!navigator.geolocation) {
-    console.log("AETHR: Geolocation is not supported by your browser. Falling back to default.");
-    performSearch(defaultCity);
+    console.log("AETHR: Geolocation is not supported by your browser.");
+    fallbackToIP();
     return;
   }
 
@@ -841,8 +859,8 @@ function fetchUserLocation() {
       performSearch({ lat, lon });
     },
     (error) => {
-      console.log("AETHR: Geolocation failed or denied. Falling back to default.", error.message);
-      performSearch(defaultCity);
+      console.log("AETHR: HTML5 Geolocation failed or denied.", error.message);
+      fallbackToIP();
     },
     { timeout: 10000 }
   );
