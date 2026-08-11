@@ -927,7 +927,7 @@ function renderSuggestions(cities) {
     const handleSelect = () => {
       cityInput.value = locationName;
       searchSuggestions.classList.remove("is-active");
-      searchForm.dispatchEvent(new Event("submit"));
+      performSearch({ lat: city.latitude, lon: city.longitude });
     };
 
     li.addEventListener("click", handleSelect);
