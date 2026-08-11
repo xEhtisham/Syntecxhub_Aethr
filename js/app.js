@@ -883,5 +883,5 @@ function getWeatherIcon(condition, iconCode) {
   return isNight ? "clear-night" : "clear-day";
 }
 function getWeatherIconURL(iconName) {
-  return `https://cdn.meteocons.com/latest/svg/monochrome/${iconName}.svg`;
+  return `https://cdn.jsdelivr.net/npm/@meteocons/svg/monochrome/${iconName}.svg`;
 }
