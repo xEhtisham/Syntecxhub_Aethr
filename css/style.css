@@ -428,9 +428,9 @@ a {
     transform: translateY(-10px);
     
     transition:
-        opacity 0.3s var(--ease-out),
-        transform 0.3s var(--ease-out),
-        visibility 0.3s var(--ease-out);
+        opacity 0.1s var(--ease-out),
+        transform 0.1s var(--ease-out),
+        visibility 0.1s var(--ease-out);
         
     z-index: 100;
 }

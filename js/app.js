@@ -959,7 +959,7 @@ if (cityInput) {
     } catch (error) {
       console.error("Geocoding API Error:", error);
     }
-  }, 300);
+  }, 100);
 
   cityInput.addEventListener("input", handleInput);
   
