@@ -797,6 +797,12 @@ async function performSearch(query) {
     console.log("AETHR: Searching for:", query);
 
     const weatherData = await fetchWeather(query);
+    
+    // Override OpenWeatherMap's matched city name with our exact location name
+    if (typeof query === "object" && query.name) {
+      weatherData.name = query.name;
+    }
+    
     currentWeatherData = weatherData;
     console.log("AETHR: Current weather received.");
     updateWeatherUI(weatherData);
@@ -927,7 +933,7 @@ function renderSuggestions(cities) {
     const handleSelect = () => {
       cityInput.value = locationName;
       searchSuggestions.classList.remove("is-active");
-      performSearch({ lat: city.latitude, lon: city.longitude });
+      performSearch({ lat: city.latitude, lon: city.longitude, name: city.name });
     };
 
     li.addEventListener("click", handleSelect);
