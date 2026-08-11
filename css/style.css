@@ -1755,3 +1755,56 @@ a:focus-visible {
     outline: none;
     box-shadow: none;
 }
+
+/* =========================================================
+   AETHR — WEATHER ICONS
+   ========================================================= */
+
+.weather-icon {
+    display: grid;
+    place-items: center;
+}
+
+
+.weather-icon__image {
+    width: 76px;
+    height: 76px;
+
+    object-fit: contain;
+
+    display: block;
+
+    filter:
+        drop-shadow(0 0 20px rgba(168, 255, 234, 0.08));
+}
+
+
+/* Forecast */
+
+.forecast-day__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.forecast-icon__image {
+    width: 46px;
+    height: 46px;
+
+    object-fit: contain;
+
+    display: block;
+
+    opacity: 0.9;
+
+    transition:
+        transform 0.5s ease,
+        opacity 0.3s ease;
+}
+
+
+.forecast-day:hover .forecast-icon__image {
+    transform: translateY(-4px) scale(1.08);
+    opacity: 1;
+}

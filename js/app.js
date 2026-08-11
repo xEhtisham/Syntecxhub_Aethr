@@ -602,6 +602,21 @@ function updateWeatherUI(data) {
 
   const weatherState = getWeatherState(condition);
 
+  const iconName = getWeatherIcon(
+    data.weather[0].description,
+    data.weather[0].icon,
+  );
+  
+  const iconURL = getWeatherIconURL(iconName);
+  
+  weatherIcon.innerHTML = `
+    <img
+        src="${iconURL}"
+        alt="${data.weather[0].description}"
+        class="weather-icon__image"
+    >
+`;
+
   setWeatherState(weatherState);
 }
 
@@ -680,6 +695,12 @@ function updateForecastUI(data) {
 
     const weatherState = getWeatherState(middayForecast.weather[0].main);
 
+    const iconName = getWeatherIcon(
+      middayForecast.weather[0].description,
+      middayForecast.weather[0].icon
+    );
+    const iconURL = getWeatherIconURL(iconName);
+
     const forecastItem = document.createElement("article");
 
     forecastItem.className = "forecast-day";
@@ -693,7 +714,9 @@ function updateForecastUI(data) {
             <div
                 class="forecast-day__icon"
                 data-weather="${weatherState}"
-            ></div>
+            >
+                <img src="${iconURL}" alt="${condition}" class="forecast-icon__image">
+            </div>
 
             <span class="forecast-day__condition">
                 ${condition}
@@ -823,4 +846,42 @@ if (fahrenheitBtn) {
   fahrenheitBtn.addEventListener("click", () => {
     setTemperatureUnit("fahrenheit");
   });
+}
+function getWeatherIcon(condition, iconCode) {
+  const isNight = iconCode?.endsWith("n");
+
+  condition = condition.toLowerCase();
+
+  if (condition.includes("thunderstorm")) {
+    return isNight ? "thunderstorms-night-rain" : "thunderstorms-day-rain";
+  }
+
+  if (condition.includes("drizzle")) {
+    return "drizzle";
+  }
+
+  if (condition.includes("rain")) {
+    return "rain";
+  }
+
+  if (condition.includes("snow")) {
+    return "snow";
+  }
+
+  if (
+    condition.includes("mist") ||
+    condition.includes("fog") ||
+    condition.includes("haze")
+  ) {
+    return isNight ? "fog-night" : "fog-day";
+  }
+
+  if (condition.includes("cloud")) {
+    return isNight ? "partly-cloudy-night" : "partly-cloudy-day";
+  }
+
+  return isNight ? "clear-night" : "clear-day";
+}
+function getWeatherIconURL(iconName) {
+  return `https://cdn.meteocons.com/latest/svg/monochrome/${iconName}.svg`;
 }
