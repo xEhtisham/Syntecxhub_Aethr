@@ -12,7 +12,7 @@ const WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather";
 
 const FORECAST_API_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
-const GEO_API_URL = "https://api.openweathermap.org/geo/1.0/direct";
+const GEO_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
 
 /* ---------------------------------------------------------
    02. DOM ELEMENTS
@@ -515,13 +515,13 @@ async function fetchWeather(city) {
    --------------------------------------------------------- */
 
 async function fetchSuggestions(query) {
-  const url = `${GEO_API_URL}?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
+  const url = `${GEO_API_URL}?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
   const response = await fetch(url);
   
   if (!response.ok) return [];
   
   const data = await response.json();
-  return data;
+  return data.results || [];
 }
 
 /* ---------------------------------------------------------
@@ -861,12 +861,12 @@ function renderSuggestions(cities) {
     li.tabIndex = 0;
     li.dataset.index = index;
 
-    const locationName = `${city.name}${city.state ? ', ' + city.state : ''}, ${city.country}`;
+    const locationName = `${city.name}, ${city.country_code}`;
     
     li.innerHTML = `
       <i class="ph ph-map-pin search__suggestion-icon"></i>
       <span class="search__suggestion-name">${city.name}</span>
-      <span class="search__suggestion-context">${city.state ? city.state + ', ' : ''}${city.country}</span>
+      <span class="search__suggestion-context">${city.admin1 ? city.admin1 + ', ' : ''}${city.country}</span>
     `;
 
     const handleSelect = () => {
