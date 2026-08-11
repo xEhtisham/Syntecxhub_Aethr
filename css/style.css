@@ -283,6 +283,8 @@ a {
 .search {
     display: flex;
     justify-content: center;
+    position: relative;
+    z-index: 100;
 
     margin-top: 72px;
 }
@@ -290,6 +292,7 @@ a {
 .search__container {
     position: relative;
     width: min(100%, 460px);
+    z-index: 100;
 }
 
 .search__form {
