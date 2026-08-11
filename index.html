@@ -66,20 +66,26 @@
         <!-- Search -->
         <section class="search" aria-label="Search weather">
 
-            <form class="search__form" id="searchForm">
+            <div class="search__container">
+                <form class="search__form" id="searchForm">
 
-                <div class="search__icon" aria-hidden="true">
-                    <span></span>
-                </div>
+                    <div class="search__icon" aria-hidden="true">
+                        <span></span>
+                    </div>
 
-                <input type="text" id="cityInput" class="search__input" placeholder="Search a city..."
-                    autocomplete="off" aria-label="City name">
+                    <input type="text" id="cityInput" class="search__input" placeholder="Search a city..."
+                        autocomplete="off" aria-label="City name">
 
-                <button type="submit" class="search__submit" aria-label="Search">
-                    <span>↵</span>
-                </button>
+                    <button type="submit" class="search__submit" aria-label="Search">
+                        <span>↵</span>
+                    </button>
 
-            </form>
+                </form>
+
+                <ul class="search__suggestions" id="searchSuggestions" role="listbox">
+                    <!-- Dynamic suggestions go here -->
+                </ul>
+            </div>
 
         </section>
 

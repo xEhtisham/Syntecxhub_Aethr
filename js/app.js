@@ -12,6 +12,8 @@ const WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather";
 
 const FORECAST_API_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
+const GEO_API_URL = "https://api.openweathermap.org/geo/1.0/direct";
+
 /* ---------------------------------------------------------
    02. DOM ELEMENTS
    --------------------------------------------------------- */
@@ -26,6 +28,8 @@ const searchForm = document.getElementById("searchForm");
 const cityInput = document.getElementById("cityInput");
 
 const forecastList = document.getElementById("forecastList");
+
+const searchSuggestions = document.getElementById("searchSuggestions");
 
 /* ---------------------------------------------------------
    TEMPERATURE UNIT
@@ -507,6 +511,20 @@ async function fetchWeather(city) {
 }
 
 /* ---------------------------------------------------------
+   08.5. GEOCODING API
+   --------------------------------------------------------- */
+
+async function fetchSuggestions(query) {
+  const url = `${GEO_API_URL}?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
+  const response = await fetch(url);
+  
+  if (!response.ok) return [];
+  
+  const data = await response.json();
+  return data;
+}
+
+/* ---------------------------------------------------------
    09. FORECAST API
    --------------------------------------------------------- */
 
@@ -793,6 +811,11 @@ if (searchForm && cityInput) {
       updateForecastUI(forecastData);
 
       hideStatus();
+      
+      // Close suggestions on successful search
+      if (searchSuggestions) {
+        searchSuggestions.classList.remove("is-active");
+      }
 
       cityInput.value = "";
     } catch (error) {
@@ -804,8 +827,135 @@ if (searchForm && cityInput) {
 } else {
   console.error("AETHR: Search form or city input not found.");
 }
+
 /* ---------------------------------------------------------
-   °C / °F TOGGLE
+   13. SEARCH SUGGESTIONS LOGIC
+   --------------------------------------------------------- */
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function renderSuggestions(cities) {
+  if (!searchSuggestions) return;
+
+  searchSuggestions.innerHTML = "";
+  
+  if (cities.length === 0) {
+    searchSuggestions.classList.remove("is-active");
+    return;
+  }
+
+  cities.forEach((city, index) => {
+    const li = document.createElement("li");
+    li.className = "search__suggestion-item";
+    
+    li.tabIndex = 0;
+    li.dataset.index = index;
+
+    const locationName = `${city.name}${city.state ? ', ' + city.state : ''}, ${city.country}`;
+    
+    li.innerHTML = `
+      <i class="ph ph-map-pin search__suggestion-icon"></i>
+      <span class="search__suggestion-name">${city.name}</span>
+      <span class="search__suggestion-context">${city.state ? city.state + ', ' : ''}${city.country}</span>
+    `;
+
+    const handleSelect = () => {
+      cityInput.value = locationName;
+      searchSuggestions.classList.remove("is-active");
+      searchForm.dispatchEvent(new Event("submit"));
+    };
+
+    li.addEventListener("click", handleSelect);
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSelect();
+      }
+    });
+
+    searchSuggestions.appendChild(li);
+  });
+
+  searchSuggestions.classList.add("is-active");
+}
+
+if (cityInput) {
+  const handleInput = debounce(async (event) => {
+    const query = event.target.value.trim();
+    
+    if (query.length < 2) {
+      if (searchSuggestions) searchSuggestions.classList.remove("is-active");
+      return;
+    }
+
+    try {
+      const cities = await fetchSuggestions(query);
+      renderSuggestions(cities);
+    } catch (error) {
+      console.error("Geocoding API Error:", error);
+    }
+  }, 300);
+
+  cityInput.addEventListener("input", handleInput);
+  
+  // Close suggestions when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!searchForm.contains(e.target) && searchSuggestions) {
+      searchSuggestions.classList.remove("is-active");
+    }
+  });
+
+  // Handle keyboard navigation
+  cityInput.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && searchSuggestions) {
+      searchSuggestions.classList.remove("is-active");
+      return;
+    }
+    
+    if (searchSuggestions && searchSuggestions.classList.contains("is-active")) {
+      const items = searchSuggestions.querySelectorAll('.search__suggestion-item');
+      if (items.length > 0 && e.key === "ArrowDown") {
+        e.preventDefault();
+        items[0].focus();
+      }
+    }
+  });
+
+  if (searchSuggestions) {
+    searchSuggestions.addEventListener("keydown", (e) => {
+      const items = Array.from(searchSuggestions.querySelectorAll('.search__suggestion-item'));
+      const index = items.indexOf(document.activeElement);
+      
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (index < items.length - 1) items[index + 1].focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (index > 0) {
+          items[index - 1].focus();
+        } else {
+          cityInput.focus();
+        }
+      } else if (e.key === "Escape") {
+        cityInput.focus();
+        searchSuggestions.classList.remove("is-active");
+      }
+    });
+  }
+}
+
+/* ---------------------------------------------------------
+   14. °C / °F TOGGLE
    --------------------------------------------------------- */
 
 const celsiusBtn = document.getElementById("celsiusBtn");
