@@ -34,6 +34,9 @@ const searchSuggestions = document.getElementById("searchSuggestions");
 const localTimeEl = document.getElementById("localTime");
 const favoritesContainer = document.getElementById("favoritesContainer");
 const favoriteToggle = document.getElementById("favoriteToggle");
+const locationBtn = document.getElementById("locationBtn");
+const celsiusBtn = document.getElementById("celsiusBtn");
+const fahrenheitBtn = document.getElementById("fahrenheitBtn");
 
 /* ---------------------------------------------------------
    TEMPERATURE UNIT & GLOBALS
@@ -726,6 +729,39 @@ function updateWeatherUI(data) {
         clearProps: "all",
       });
     }
+  });
+}
+
+/* ---------------------------------------------------------
+   15. HEADER CONTROLS
+   --------------------------------------------------------- */
+
+if (locationBtn) {
+  locationBtn.addEventListener("click", () => {
+    gsap.to(".location-button__icon", { rotation: "+=360", duration: 1, ease: "power2.inOut" });
+    fetchUserLocation();
+  });
+}
+
+if (celsiusBtn && fahrenheitBtn) {
+  celsiusBtn.addEventListener("click", () => {
+    if (currentUnit === "celsius") return;
+    currentUnit = "celsius";
+    celsiusBtn.classList.add("active");
+    fahrenheitBtn.classList.remove("active");
+    
+    if (currentWeatherData) updateWeatherUI(currentWeatherData);
+    if (currentForecastData) updateForecastUI(currentForecastData);
+  });
+
+  fahrenheitBtn.addEventListener("click", () => {
+    if (currentUnit === "fahrenheit") return;
+    currentUnit = "fahrenheit";
+    fahrenheitBtn.classList.add("active");
+    celsiusBtn.classList.remove("active");
+    
+    if (currentWeatherData) updateWeatherUI(currentWeatherData);
+    if (currentForecastData) updateForecastUI(currentForecastData);
   });
 }
 
