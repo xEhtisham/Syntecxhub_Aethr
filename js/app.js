@@ -31,6 +31,8 @@ const forecastList = document.getElementById("forecastList");
 
 const searchSuggestions = document.getElementById("searchSuggestions");
 
+const localTimeEl = document.getElementById("localTime");
+
 /* ---------------------------------------------------------
    TEMPERATURE UNIT
    --------------------------------------------------------- */
@@ -39,6 +41,7 @@ let currentUnit = "celsius";
 
 let currentWeatherData = null;
 let currentForecastData = null;
+let clockInterval = null;
 
 /* ---------------------------------------------------------
    03. GSAP — PAGE ENTRANCE
@@ -290,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
     yoyo: true,
     ease: "sine.inOut",
   });
-  
+
   /* Initial data load */
   fetchUserLocation();
 });
@@ -525,9 +528,9 @@ async function fetchWeather(query) {
 async function fetchSuggestions(query) {
   const url = `${GEO_API_URL}?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
   const response = await fetch(url);
-  
+
   if (!response.ok) return [];
-  
+
   const data = await response.json();
   return data.results || [];
 }
@@ -592,6 +595,28 @@ function formatTemperature(celsius) {
 
   return `${Math.round(value)}°`;
 }
+
+function startLocalTimeClock(timezoneOffset) {
+  if (clockInterval) {
+    clearInterval(clockInterval);
+  }
+
+  const updateClock = () => {
+    // Current UTC time in milliseconds
+    const utcTime = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
+    // Local time = UTC time + timezone offset
+    const localTime = new Date(utcTime + (timezoneOffset * 1000));
+    
+    if (localTimeEl) {
+      localTimeEl.textContent = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  };
+
+  // Run immediately then every second
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
+}
+
 /* ---------------------------------------------------------
    10. UPDATE CURRENT WEATHER
    --------------------------------------------------------- */
@@ -629,6 +654,8 @@ function updateWeatherUI(data) {
 
   visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
 
+  startLocalTimeClock(data.timezone);
+
   const condition = data.weather[0].main;
 
   const weatherState = getWeatherState(condition);
@@ -637,9 +664,9 @@ function updateWeatherUI(data) {
     data.weather[0].description,
     data.weather[0].icon,
   );
-  
+
   const iconURL = getWeatherIconURL(iconName);
-  
+
   weatherIcon.innerHTML = `
     <img
         src="${iconURL}"
@@ -728,7 +755,7 @@ function updateForecastUI(data) {
 
     const iconName = getWeatherIcon(
       middayForecast.weather[0].description,
-      middayForecast.weather[0].icon
+      middayForecast.weather[0].icon,
     );
     const iconURL = getWeatherIconURL(iconName);
 
@@ -797,12 +824,12 @@ async function performSearch(query) {
     console.log("AETHR: Searching for:", query);
 
     const weatherData = await fetchWeather(query);
-    
+
     // Override OpenWeatherMap's matched city name with our exact location name
     if (typeof query === "object" && query.name) {
       weatherData.name = query.name;
     }
-    
+
     currentWeatherData = weatherData;
     console.log("AETHR: Current weather received.");
     updateWeatherUI(weatherData);
@@ -813,7 +840,7 @@ async function performSearch(query) {
     updateForecastUI(forecastData);
 
     hideStatus();
-    
+
     // Close suggestions on successful search
     if (searchSuggestions) {
       searchSuggestions.classList.remove("is-active");
@@ -836,11 +863,11 @@ async function fetchUserLocation() {
       console.log("AETHR: Attempting IP-based geolocation fallback...");
       const response = await fetch("https://get.geojs.io/v1/ip/geo.json");
       if (!response.ok) throw new Error("IP Geolocation failed");
-      
+
       const data = await response.json();
       const lat = data.latitude;
       const lon = data.longitude;
-      
+
       console.log(`AETHR: IP Geolocation successful (${lat}, ${lon}).`);
       performSearch({ lat, lon });
     } catch (error) {
@@ -868,7 +895,7 @@ async function fetchUserLocation() {
       console.log("AETHR: HTML5 Geolocation failed or denied.", error.message);
       fallbackToIP();
     },
-    { timeout: 10000 }
+    { timeout: 10000 },
   );
 }
 
@@ -882,7 +909,7 @@ if (searchForm && cityInput) {
       cityInput.focus();
       return;
     }
-    
+
     performSearch(city);
   });
 } else {
@@ -909,7 +936,7 @@ function renderSuggestions(cities) {
   if (!searchSuggestions) return;
 
   searchSuggestions.innerHTML = "";
-  
+
   if (cities.length === 0) {
     searchSuggestions.classList.remove("is-active");
     return;
@@ -918,22 +945,26 @@ function renderSuggestions(cities) {
   cities.forEach((city, index) => {
     const li = document.createElement("li");
     li.className = "search__suggestion-item";
-    
+
     li.tabIndex = 0;
     li.dataset.index = index;
 
     const locationName = `${city.name}, ${city.country_code}`;
-    
+
     li.innerHTML = `
       <i class="ph ph-map-pin search__suggestion-icon"></i>
       <span class="search__suggestion-name">${city.name}</span>
-      <span class="search__suggestion-context">${city.admin1 ? city.admin1 + ', ' : ''}${city.country}</span>
+      <span class="search__suggestion-context">${city.admin1 ? city.admin1 + ", " : ""}${city.country}</span>
     `;
 
     const handleSelect = () => {
       cityInput.value = locationName;
       searchSuggestions.classList.remove("is-active");
-      performSearch({ lat: city.latitude, lon: city.longitude, name: city.name });
+      performSearch({
+        lat: city.latitude,
+        lon: city.longitude,
+        name: city.name,
+      });
     };
 
     li.addEventListener("click", handleSelect);
@@ -953,7 +984,7 @@ function renderSuggestions(cities) {
 if (cityInput) {
   const handleInput = debounce(async (event) => {
     const query = event.target.value.trim();
-    
+
     if (query.length < 2) {
       if (searchSuggestions) searchSuggestions.classList.remove("is-active");
       return;
@@ -968,7 +999,7 @@ if (cityInput) {
   }, 100);
 
   cityInput.addEventListener("input", handleInput);
-  
+
   // Close suggestions when clicking outside
   document.addEventListener("click", (e) => {
     if (!searchForm.contains(e.target) && searchSuggestions) {
@@ -982,9 +1013,14 @@ if (cityInput) {
       searchSuggestions.classList.remove("is-active");
       return;
     }
-    
-    if (searchSuggestions && searchSuggestions.classList.contains("is-active")) {
-      const items = searchSuggestions.querySelectorAll('.search__suggestion-item');
+
+    if (
+      searchSuggestions &&
+      searchSuggestions.classList.contains("is-active")
+    ) {
+      const items = searchSuggestions.querySelectorAll(
+        ".search__suggestion-item",
+      );
       if (items.length > 0 && e.key === "ArrowDown") {
         e.preventDefault();
         items[0].focus();
@@ -994,9 +1030,11 @@ if (cityInput) {
 
   if (searchSuggestions) {
     searchSuggestions.addEventListener("keydown", (e) => {
-      const items = Array.from(searchSuggestions.querySelectorAll('.search__suggestion-item'));
+      const items = Array.from(
+        searchSuggestions.querySelectorAll(".search__suggestion-item"),
+      );
       const index = items.indexOf(document.activeElement);
-      
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
         if (index < items.length - 1) items[index + 1].focus();

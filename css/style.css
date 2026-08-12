@@ -536,6 +536,16 @@ a {
     text-transform: capitalize;
 }
 
+.hero__time {
+    margin-top: 6px;
+
+    color: var(--text-dim);
+
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+}
+
 
 /* ---------------------------------------------------------
    TEMPERATURE
