@@ -78,6 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
     y: 20,
   });
 
+  gsap.set(".hero__time", {
+    opacity: 0,
+    y: 20,
+  });
+
   gsap.set(".temperature", {
     opacity: 0,
     y: 40,
@@ -169,6 +174,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     .to(
       ".weather-description",
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+      },
+      "-=0.5",
+    )
+
+    .to(
+      ".hero__time",
       {
         opacity: 1,
         y: 0,
@@ -633,59 +648,78 @@ function startLocalTimeClock(timezoneOffset) {
 
 function updateWeatherUI(data) {
   const cityName = document.getElementById("cityName");
-
   const weatherDescription = document.getElementById("weatherDescription");
-
   const temperature = document.getElementById("temperature");
-
   const feelsLike = document.getElementById("feelsLike");
-
   const humidity = document.getElementById("humidity");
-
   const wind = document.getElementById("wind");
-
   const pressure = document.getElementById("pressure");
-
   const visibility = document.getElementById("visibility");
+  const localTimeEl = document.getElementById("localTime");
 
-  cityName.textContent = data.name;
+  const animatedElements = [
+    cityName,
+    weatherDescription,
+    localTimeEl,
+    temperature,
+    feelsLike,
+    humidity,
+    wind,
+    pressure,
+    visibility,
+  ];
 
-  weatherDescription.textContent = data.weather[0].description;
+  // If this is the very first load, elements are already at opacity 0 from CSS/GSAP setup.
+  // We can just set data and fade in.
+  // But if it's an update, they are opacity 1 and need to fade out.
+  // Using gsap.to to fade out, then onComplete we swap the data.
+  gsap.to(animatedElements, {
+    opacity: 0,
+    y: 10,
+    duration: 0.3,
+    stagger: 0.02,
+    ease: "power2.in",
+    onComplete: () => {
+      cityName.textContent = data.name;
+      weatherDescription.textContent = data.weather[0].description;
+      temperature.textContent = formatTemperature(data.main.temp);
+      feelsLike.textContent = formatTemperature(data.main.feels_like);
+      humidity.textContent = `${data.main.humidity}%`;
+      wind.textContent = `${Math.round(data.wind.speed * 3.6)} km/h`;
+      pressure.textContent = `${data.main.pressure} hPa`;
+      visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
 
-  temperature.textContent = formatTemperature(data.main.temp);
+      startLocalTimeClock(data.timezone);
 
-  feelsLike.textContent = formatTemperature(data.main.feels_like);
+      const condition = data.weather[0].main;
+      const weatherState = getWeatherState(condition);
+      const iconName = getWeatherIcon(
+        data.weather[0].description,
+        data.weather[0].icon,
+      );
+      const iconURL = getWeatherIconURL(iconName);
 
-  humidity.textContent = `${data.main.humidity}%`;
+      weatherIcon.innerHTML = `
+        <img
+            src="${iconURL}"
+            alt="${data.weather[0].description}"
+            class="weather-icon__image"
+        >
+      `;
 
-  wind.textContent = `${Math.round(data.wind.speed * 3.6)} km/h`;
+      setWeatherState(weatherState);
 
-  pressure.textContent = `${data.main.pressure} hPa`;
-
-  visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
-
-  startLocalTimeClock(data.timezone);
-
-  const condition = data.weather[0].main;
-
-  const weatherState = getWeatherState(condition);
-
-  const iconName = getWeatherIcon(
-    data.weather[0].description,
-    data.weather[0].icon,
-  );
-
-  const iconURL = getWeatherIconURL(iconName);
-
-  weatherIcon.innerHTML = `
-    <img
-        src="${iconURL}"
-        alt="${data.weather[0].description}"
-        class="weather-icon__image"
-    >
-`;
-
-  setWeatherState(weatherState);
+      // Fade back in
+      gsap.to(animatedElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        stagger: 0.03,
+        ease: "power2.out",
+        clearProps: "all",
+      });
+    }
+  });
 }
 
 /* ---------------------------------------------------------
@@ -728,52 +762,54 @@ function updateForecastUI(data) {
   const days = Object.values(dailyForecasts).slice(0, 5);
 
   console.log("AETHR: Daily forecast groups:", days.length);
+  const existingCards = forecastList.querySelectorAll(".forecast-day");
 
-  forecastList.innerHTML = "";
+  const renderForecastCards = () => {
+    forecastList.innerHTML = "";
 
-  days.forEach((day, index) => {
-    /*
+    days.forEach((day, index) => {
+      /*
            Find the forecast closest to 12:00.
         */
 
-    const middayForecast = day.reduce((closest, current) => {
-      const currentHour = new Date(current.dt * 1000).getHours();
+      const middayForecast = day.reduce((closest, current) => {
+        const currentHour = new Date(current.dt * 1000).getHours();
 
-      const closestHour = new Date(closest.dt * 1000).getHours();
+        const closestHour = new Date(closest.dt * 1000).getHours();
 
-      return Math.abs(currentHour - 12) < Math.abs(closestHour - 12)
-        ? current
-        : closest;
-    });
+        return Math.abs(currentHour - 12) < Math.abs(closestHour - 12)
+          ? current
+          : closest;
+      });
 
-    const date = new Date(middayForecast.dt * 1000);
+      const date = new Date(middayForecast.dt * 1000);
 
-    const dayName =
-      index === 0
-        ? "TODAY"
-        : date
-            .toLocaleDateString("en-US", {
-              weekday: "short",
-            })
-            .toUpperCase();
+      const dayName =
+        index === 0
+          ? "TODAY"
+          : date
+              .toLocaleDateString("en-US", {
+                weekday: "short",
+              })
+              .toUpperCase();
 
-    const temperature = formatTemperature(middayForecast.main.temp);
+      const temperature = formatTemperature(middayForecast.main.temp);
 
-    const condition = middayForecast.weather[0].description;
+      const condition = middayForecast.weather[0].description;
 
-    const weatherState = getWeatherState(middayForecast.weather[0].main);
+      const weatherState = getWeatherState(middayForecast.weather[0].main);
 
-    const iconName = getWeatherIcon(
-      middayForecast.weather[0].description,
-      middayForecast.weather[0].icon,
-    );
-    const iconURL = getWeatherIconURL(iconName);
+      const iconName = getWeatherIcon(
+        middayForecast.weather[0].description,
+        middayForecast.weather[0].icon,
+      );
+      const iconURL = getWeatherIconURL(iconName);
 
-    const forecastItem = document.createElement("article");
+      const forecastItem = document.createElement("article");
 
-    forecastItem.className = "forecast-day";
+      forecastItem.className = "forecast-day";
 
-    forecastItem.innerHTML = `
+      forecastItem.innerHTML = `
 
             <span class="forecast-day__name">
                 ${dayName}
@@ -796,29 +832,43 @@ function updateForecastUI(data) {
 
         `;
 
-    forecastList.appendChild(forecastItem);
-  });
+      forecastList.appendChild(forecastItem);
+    });
 
-  /*
+    /*
        Animate generated forecast items.
     */
 
-  gsap.fromTo(
-    forecastList.querySelectorAll(".forecast-day"),
+    gsap.fromTo(
+      forecastList.querySelectorAll(".forecast-day"),
 
-    {
+      {
+        opacity: 0,
+        y: 20,
+      },
+
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: "power3.out",
+      },
+    );
+  };
+
+  if (existingCards.length > 0) {
+    gsap.to(existingCards, {
       opacity: 0,
-      y: 20,
-    },
-
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      stagger: 0.08,
-      ease: "power3.out",
-    },
-  );
+      y: 10,
+      duration: 0.3,
+      stagger: 0.02,
+      ease: "power2.in",
+      onComplete: renderForecastCards,
+    });
+  } else {
+    renderForecastCards();
+  }
 
   console.log("AETHR: Forecast UI updated successfully.");
 }
