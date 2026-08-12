@@ -1079,6 +1079,11 @@ function debounce(func, wait) {
 
 function renderSuggestions(cities) {
   if (!searchSuggestions) return;
+  
+  if (cityInput.value.trim().length < 2) {
+    searchSuggestions.classList.remove("is-active");
+    return;
+  }
 
   searchSuggestions.innerHTML = "";
 
