@@ -295,7 +295,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* Initial data load */
-  fetchUserLocation();
+  const savedLocation = localStorage.getItem("aethr_last_location");
+  if (savedLocation) {
+    try {
+      const locationQuery = JSON.parse(savedLocation);
+      performSearch(locationQuery);
+    } catch (e) {
+      performSearch(savedLocation);
+    }
+  } else {
+    fetchUserLocation();
+  }
 });
 
 /* ---------------------------------------------------------
@@ -840,6 +850,13 @@ async function performSearch(query) {
     updateForecastUI(forecastData);
 
     hideStatus();
+    
+    // Save successful search to localStorage so it persists on reload
+    if (typeof query === "object") {
+      localStorage.setItem("aethr_last_location", JSON.stringify(query));
+    } else {
+      localStorage.setItem("aethr_last_location", query);
+    }
 
     // Close suggestions on successful search
     if (searchSuggestions) {
@@ -867,9 +884,15 @@ async function fetchUserLocation() {
       const data = await response.json();
       const lat = data.latitude;
       const lon = data.longitude;
+      const city = data.city;
 
-      console.log(`AETHR: IP Geolocation successful (${lat}, ${lon}).`);
-      performSearch({ lat, lon });
+      console.log(`AETHR: IP Geolocation successful (${lat}, ${lon}, ${city}).`);
+      
+      if (city) {
+        performSearch({ lat, lon, name: city });
+      } else {
+        performSearch({ lat, lon });
+      }
     } catch (error) {
       console.log("AETHR: IP Geolocation failed too. Falling back to default.");
       performSearch(defaultCity);
