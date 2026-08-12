@@ -86,6 +86,10 @@
                     <!-- Dynamic suggestions go here -->
                 </ul>
             </div>
+            
+            <div class="search__favorites" id="favoritesContainer">
+                <!-- Favorite chips injected here -->
+            </div>
 
         </section>
 
@@ -120,9 +124,14 @@
                     CURRENT WEATHER
                 </p>
 
-                <h1 class="city-name" id="cityName">
-                    Peshawar
-                </h1>
+                <div class="city-name__wrapper">
+                    <h1 class="city-name" id="cityName">
+                        Peshawar
+                    </h1>
+                    <button class="favorite-toggle" id="favoriteToggle" aria-label="Add to favorites">
+                        <i class="ph ph-star"></i>
+                    </button>
+                </div>
 
                 <p class="weather-description" id="weatherDescription">
                     Partly cloudy

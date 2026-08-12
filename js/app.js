@@ -32,9 +32,11 @@ const forecastList = document.getElementById("forecastList");
 const searchSuggestions = document.getElementById("searchSuggestions");
 
 const localTimeEl = document.getElementById("localTime");
+const favoritesContainer = document.getElementById("favoritesContainer");
+const favoriteToggle = document.getElementById("favoriteToggle");
 
 /* ---------------------------------------------------------
-   TEMPERATURE UNIT
+   TEMPERATURE UNIT & GLOBALS
    --------------------------------------------------------- */
 
 let currentUnit = "celsius";
@@ -42,6 +44,8 @@ let currentUnit = "celsius";
 let currentWeatherData = null;
 let currentForecastData = null;
 let clockInterval = null;
+
+let favorites = JSON.parse(localStorage.getItem("aethr_favorites")) || [];
 
 /* ---------------------------------------------------------
    03. GSAP — PAGE ENTRANCE
@@ -321,6 +325,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     fetchUserLocation();
   }
+
+  renderFavorites();
 });
 
 /* ---------------------------------------------------------
@@ -690,6 +696,7 @@ function updateWeatherUI(data) {
       visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
 
       startLocalTimeClock(data.timezone);
+      updateFavoriteIcon(data.name);
 
       const condition = data.weather[0].main;
       const weatherState = getWeatherState(condition);
@@ -994,7 +1001,71 @@ if (searchForm && cityInput) {
 }
 
 /* ---------------------------------------------------------
-   13. SEARCH SUGGESTIONS LOGIC
+   13. FAVORITES LOGIC
+   --------------------------------------------------------- */
+
+function renderFavorites() {
+  if (!favoritesContainer) return;
+  favoritesContainer.innerHTML = "";
+
+  favorites.forEach((fav) => {
+    const chip = document.createElement("button");
+    chip.className = "favorite-chip";
+    chip.textContent = fav.name;
+    chip.addEventListener("click", () => {
+      performSearch(fav);
+    });
+    favoritesContainer.appendChild(chip);
+  });
+}
+
+function updateFavoriteIcon(cityName) {
+  if (!favoriteToggle) return;
+  const isFav = favorites.some((f) => f.name === cityName);
+  if (isFav) {
+    favoriteToggle.classList.add("is-favorite");
+    favoriteToggle.innerHTML = '<i class="ph-fill ph-star"></i>';
+  } else {
+    favoriteToggle.classList.remove("is-favorite");
+    favoriteToggle.innerHTML = '<i class="ph ph-star"></i>';
+  }
+}
+
+if (favoriteToggle) {
+  favoriteToggle.addEventListener("click", () => {
+    if (!currentWeatherData) return;
+
+    const existingIndex = favorites.findIndex(
+      (f) => f.name === currentWeatherData.name
+    );
+
+    if (existingIndex >= 0) {
+      // Remove from favorites
+      favorites.splice(existingIndex, 1);
+    } else {
+      // Add to favorites
+      favorites.push({
+        name: currentWeatherData.name,
+        lat: currentWeatherData.coord.lat,
+        lon: currentWeatherData.coord.lon,
+      });
+
+      // Animate the star toggle icon
+      gsap.fromTo(
+        favoriteToggle,
+        { scale: 0.5, rotation: -45 },
+        { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(1.7)" }
+      );
+    }
+
+    localStorage.setItem("aethr_favorites", JSON.stringify(favorites));
+    renderFavorites();
+    updateFavoriteIcon(currentWeatherData.name);
+  });
+}
+
+/* ---------------------------------------------------------
+   14. SEARCH SUGGESTIONS LOGIC
    --------------------------------------------------------- */
 
 function debounce(func, wait) {
