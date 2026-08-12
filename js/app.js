@@ -892,6 +892,7 @@ async function performSearch(query) {
   
   if (cityInput) {
     cityInput.blur();
+    cityInput.value = "";
   }
 
   showStatus("SEARCHING ATMOSPHERE", `Reading conditions...`);
@@ -922,10 +923,6 @@ async function performSearch(query) {
       localStorage.setItem("aethr_last_location", JSON.stringify(query));
     } else {
       localStorage.setItem("aethr_last_location", query);
-    }
-
-    if (cityInput) {
-      cityInput.value = "";
     }
   } catch (error) {
     console.error("AETHR WEATHER ERROR:", error);
