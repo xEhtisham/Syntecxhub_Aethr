@@ -878,6 +878,15 @@ function updateForecastUI(data) {
    --------------------------------------------------------- */
 
 async function performSearch(query) {
+  // Close suggestions immediately upon search start
+  if (searchSuggestions) {
+    searchSuggestions.classList.remove("is-active");
+  }
+  
+  if (cityInput) {
+    cityInput.blur();
+  }
+
   showStatus("SEARCHING ATMOSPHERE", `Reading conditions...`);
 
   try {
@@ -906,11 +915,6 @@ async function performSearch(query) {
       localStorage.setItem("aethr_last_location", JSON.stringify(query));
     } else {
       localStorage.setItem("aethr_last_location", query);
-    }
-
-    // Close suggestions on successful search
-    if (searchSuggestions) {
-      searchSuggestions.classList.remove("is-active");
     }
 
     if (cityInput) {
