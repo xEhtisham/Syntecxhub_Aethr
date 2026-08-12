@@ -1148,9 +1148,14 @@ a {
         font-size: clamp(2.4rem, 12vw, 4rem);
     }
 
+    .hero__location {
+        order: 0;
+    }
+
     .hero__temperature {
         flex: 1;
         width: 100%;
+        order: 2;
     }
 
     .temperature {
@@ -1162,9 +1167,12 @@ a {
         align-self: center;
 
         flex-direction: row;
+        justify-content: center;
         gap: 20px;
+        margin: 20px 0;
 
         min-width: auto;
+        order: 1;
     }
 
     .weather-icon {
@@ -1175,6 +1183,7 @@ a {
 
     .feels-like {
         align-items: flex-start;
+        justify-content: center;
     }
 
     .weather-details {
@@ -1185,6 +1194,10 @@ a {
         min-height: 95px;
         padding: 20px;
         border-bottom: 1px solid var(--border);
+    }
+    
+    .detail:first-child {
+        padding-left: 20px;
     }
 
     .detail:nth-child(2) {
